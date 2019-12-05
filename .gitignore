@@ -1,0 +1,9 @@
+
+# files with .
+.*
+
+# main
+main
+
+# lib
+lib
