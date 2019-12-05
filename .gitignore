@@ -2,6 +2,9 @@
 # files with .
 .*
 
+# not .gitignore
+!.gitignore
+
 # main
 main
 
