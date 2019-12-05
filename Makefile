@@ -8,7 +8,7 @@ lib:
 	$(MAKE) -C ./lib/config4cpp
 
 main: clean main.cpp 
-	$(CPP) $(CFLAGS) main.cpp -o main -L"./lib/config4cpp/lib/" -lconfig4cpp -I"./lib/config4cpp/include"
+	$(CPP) $(CFLAGS) main.cpp -o main -I"./lib/config4cpp/include" -L"./lib/config4cpp/lib/" -lconfig4cpp  -I"/usr/local/include" -L"/usr/local/lib64" -lsimlib -lm
 
 clean:
 	rm -f main
