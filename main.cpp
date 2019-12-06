@@ -3,16 +3,18 @@
 
 #include "simlib.h"
 #include "config4cpp/Configuration.h"
+
 #include "config.h"
 #include "simulation.h"
+#include "objects.h"
 
 using namespace std;
+using namespace config4cpp;
 
-extern Config config;
 
 int main(int argc, char ** argv)
 {
-    unsigned long time_of_simulation;
+    unsigned long time_of_simulation = 0;
     if (argc != 3)
     {
         std::cerr << "Invalid number of arguments!\n"; 
@@ -31,7 +33,13 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    Simulation sim();
+    cout << config.t_day_high << endl;
+    cout << config.t_generate << endl;
+    cout << config.p_sunny << endl;
+    cout << config.energy_sunny << endl;
+
+
+    Simulation sim;
     sim.run(time_of_simulation);
 
     return 0;
