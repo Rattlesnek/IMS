@@ -1,34 +1,38 @@
 #include <iostream>
+#include <string.h>
 
-#include "config4cpp/Configuration.h"
 #include "simlib.h"
+#include "config4cpp/Configuration.h"
+#include "config.h"
+#include "simulation.h"
 
-
-using namespace config4cpp;
 using namespace std;
+
+extern Config config;
 
 int main(int argc, char ** argv)
 {
-    Configuration *  cfg = Configuration::create();
-    const char *     scope = "";
-    const char *     configFile = "config/someFile.cfg";
-    const char *     url;
-    const char *     file;
-    bool             true_false;
-
-    try {
-        cfg->parse(configFile);
-        url        = cfg->lookupString(scope, "url");
-        file       = cfg->lookupString(scope, "file");
-        true_false = cfg->lookupBoolean(scope, "true_false");
-    } catch(const ConfigurationException & ex) {
-        cerr << ex.c_str() << endl;
-        cfg->destroy();
+    unsigned long time_of_simulation;
+    if (argc != 3)
+    {
+        std::cerr << "Invalid number of arguments!\n"; 
+        std::cerr << "  Try ./main <config_file> <time_of_simulation>\n";
         return 1;
     }
-    cout << "url=" << url << "; file=" << file
-         << "; true_false=" << true_false
-         << endl;
-    cfg->destroy();
+    	
+    try
+    {
+        config.load(argv[1]);
+        time_of_simulation = atoi(argv[2]);
+    }	
+    catch(const ConfigurationException & ex)
+    {
+        cerr << ex.c_str() << endl;
+        return 1;
+    }
+
+    Simulation sim();
+    sim.run(time_of_simulation);
+
     return 0;
 }
