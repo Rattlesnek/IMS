@@ -27,10 +27,15 @@ public:
 class Energy : public Process
 {
 public:
+    Energy(bool _isInit) { isInit = _isInit; }
+
     void Behavior();
 
     void consumption_high();
 
     void consumption_low();
+
+
+    bool isInit;
 };
 

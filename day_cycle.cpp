@@ -19,6 +19,11 @@ void print(string fmt)
 
 void DayCycle::Behavior()
 {
+    for (int i = 0; i < config.battery_init; i++)
+    {
+        (new Energy(true))->Activate();
+    }
+    
     while (true) {
         // ============ DAY LOW - BEGIN ===============
         print("DAY LOW");

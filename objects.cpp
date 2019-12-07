@@ -11,14 +11,13 @@ bool isHigh = false;
 
 std::string weather_type;
 
-Facility s;
-
 Facility fa_high_timer("High timer facility");
 Facility fa_low_timer("Low timer facility");
 
 Facility fa_discharge("Discharge facility");
 
 Queue qu_effectivity("Effectivity queue");
+Queue qu_actual_battery_capacity("Actual battery capacity");
 
 Store st_high_consumption("High consumtion store", 0);
 Store st_low_consumption("Low consumtion store", 0);

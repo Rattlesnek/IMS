@@ -55,9 +55,11 @@ void Generator::Behavior()
     */
 void Generator::generate(int amount)
 {
+
+
     cerr << "amount: " << amount << endl;
     for (int i = 0; i < amount; i++) {
-        (new Energy)->Activate();
+        (new Energy(false))->Activate();
     }
 }
 
@@ -106,37 +108,46 @@ void Weather::Behavior()
 void Energy::Behavior() 
 {
     // cerr << "++ " << isHigh << " " << st_high_consumption.Full() << endl;
-    // cerr << "++ full: " << st_capacity.Full() << " empty: " << st_capacity.Empty() << endl;
+    //cerr << "++ full: " << st_capacity.Full() << " empty: " << st_capacity.Empty() << endl;
+    //cerr << "++ isInit " << this->isInit << '\n';
 
-    if (isHigh == true && ! st_high_consumption.Full()) {
+    if (this->isInit == false && isHigh == true && ! st_high_consumption.Full()) {
         cerr << "gen -> high\n";
-        this->consumption_high();
+        this->consumption_high();;
+    }
+    else if (this->isInit == false && isHigh == false && ! st_low_consumption.Full())
+    {
+        cerr << "gen -> low\n";
+        this->consumption_low();
     }
     else if (! st_capacity.Full()) {
         Enter(st_capacity, 1);
 
-        if (qu_effectivity.Length() == 10) {
-            for (int i = 0; i < config.battery_efficiency; i++) {
-                qu_effectivity.GetFirst()->Activate();
+        if (this->isInit == false)
+        {
+            if (qu_effectivity.Length() == 10) {
+                for (int i = 0; i < config.battery_efficiency; i++) {
+                    qu_effectivity.GetFirst()->Activate();
+                }
+                qu_effectivity.Clear();
             }
-            qu_effectivity.Clear();
+            qu_effectivity.Insert(this);
+            Passivate();
         }
-        qu_effectivity.Insert(this);
-        Passivate();
-
-        cerr << "gen -> battery ";
+        cerr << "gen -> battery \n";
         
         while (true) {
-            if (isHigh == false && ! st_low_consumption.Full()) {
-                cerr << "-> low\n";
-                Leave(st_capacity, 1);
-                this->consumption_low();
-                break;
-            }
-            else if (! st_high_consumption.Full()) {
+            if (isHigh == true && ! st_high_consumption.Full())
+            {
                 cerr << "-> high\n";
                 Leave(st_capacity, 1);
                 this->consumption_high();
+                break;
+            }
+            else if (isHigh == false && ! st_low_consumption.Full()) {
+                cerr << "-> low\n";
+                Leave(st_capacity, 1);
+                this->consumption_low();
                 break;
             }
             else if (! fa_discharge.Busy()) {
@@ -147,7 +158,7 @@ void Energy::Behavior()
                 break;
             }
             else {
-                cerr << "-> battery\n";
+                //cerr << "-> battery\n";
                 // TODO
                 Wait(1);
             }  
@@ -161,13 +172,13 @@ void Energy::Behavior()
 
 void Energy::consumption_high() 
 {
+    //cerr << "st_high: " << st_high_consumption.Used() << ' ' <<st_high_consumption.Capacity() << '\n'; 
     Enter(st_high_consumption, 1);
         
     if (st_high_consumption.Full()) {
         // buffer is full of energy and this single process will continue and wait for consumtion time
-        Leave(st_high_consumption, config.high_consume);
-
         Seize(fa_high_timer);
+        Leave(st_high_consumption, config.high_consume);
         Wait(Exponential(config.t_consume));
         Release(fa_high_timer);
     }
@@ -179,13 +190,14 @@ void Energy::consumption_high()
 
 void Energy::consumption_low()
 {
+    //cerr << "st_low: " << st_low_consumption.Used() << ' ' <<st_low_consumption.Capacity() << '\n'; 
     Enter(st_low_consumption, 1);
         
+
     if (st_low_consumption.Full()) {
         // buffer is full of energy and this single process will continue and wait for consumtion time
-        Leave(st_low_consumption, config.low_consume);
-
         Seize(fa_low_timer);
+        Leave(st_low_consumption, config.low_consume);
         Wait(Exponential(config.t_consume));
         Release(fa_low_timer);
     }
