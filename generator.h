@@ -2,10 +2,18 @@
 
 #include "simlib.h"
 
+class Checker : public Process
+{
+public:
+
+    void Behavior();    
+};
 
 class Generator : public Process
 {
 public:
+    Generator(Checker* _checker) { checker = _checker; }
+
     void Behavior();
 
     /**
@@ -14,15 +22,9 @@ public:
      * @param amount how much energy to generate
      */
     void generate(int amount);
+
+    Checker* checker;
 };
-
-
-class Weather : public Process
-{
-public:
-    void Behavior();
-};
-
 
 class Energy : public Process
 {

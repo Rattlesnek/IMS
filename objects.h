@@ -16,7 +16,11 @@ extern Facility fa_discharge;
 
 extern Queue qu_effectivity;
 extern Queue qu_actual_battery_capacity;
+extern Queue qu_energy_buffer;
 
 extern Store st_high_consumption;
 extern Store st_low_consumption;
 extern Store st_capacity;
+
+extern Store st_high_checker;
+extern Store st_low_checker;

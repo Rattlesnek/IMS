@@ -20,7 +20,6 @@ using namespace std;
  */
 void Generator::Behavior()
 {
-    //cerr << "gen: " << st.Full() << ' ' << st.Empty() << endl;
     // generator of energy
     while (true) {
         // generate after some time
@@ -30,10 +29,14 @@ void Generator::Behavior()
         if (isDay == false)
             break;
 
-        //std::cout << "sunny\n";
+        this->checker->Passivate();
+        while (! qu_energy_buffer.Empty())
+        {
+            qu_energy_buffer.GetFirst()->Activate();
+        }
+
         // according to weather generate certain amount
         if (weather_type == "sunny") {
-            //std::cout << "sunny\n";
             generate(config.energy_sunny);
         }
         else if (weather_type == "middle") {
@@ -45,6 +48,8 @@ void Generator::Behavior()
         else {
             std::cerr << "Error: weather is not set\n";
         }
+
+        //this->checker->Activate();
     }
 }
 
@@ -55,49 +60,17 @@ void Generator::Behavior()
     */
 void Generator::generate(int amount)
 {
-
-
     cerr << "amount: " << amount << endl;
     for (int i = 0; i < amount; i++) {
-        (new Energy(false))->Activate();
+        Energy *tmp = new Energy(false);
+        qu_energy_buffer.Insert(tmp);
+        tmp->Passivate();
     }
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////                                     GENERATOR (END)                                    ////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     WEATHER (BEGIN)                                    ////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-/**
- * @brief 
- * 
- */
-void Weather::Behavior()
-{
-    // set weather
-    int uni = Uniform(0, 100);
-    //std::cout << uni << std::endl;
-    if (uni <= config.p_sunny) {
-        weather_type = "sunny";
-        cerr << "Weather: sunny\n"; 
-    }
-    else if (config.p_sunny < uni && uni <= config.p_sunny + config.p_middle) {
-        weather_type = "middle";
-        cerr << "Weather: middle\n";
-    }
-    else {
-        weather_type = "cloudy";
-        cerr << "Weather: cloudy\n";
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     WEATHER (END)                                      ////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +86,7 @@ void Energy::Behavior()
 
     if (this->isInit == false && isHigh == true && ! st_high_consumption.Full()) {
         cerr << "gen -> high\n";
-        this->consumption_high();;
+        this->consumption_high();
     }
     else if (this->isInit == false && isHigh == false && ! st_low_consumption.Full())
     {
@@ -160,7 +133,9 @@ void Energy::Behavior()
             else {
                 //cerr << "-> battery\n";
                 // TODO
-                Wait(1);
+                qu_actual_battery_capacity.Insert(this);
+                Passivate();
+                //Wait(1);
             }  
         }      
     }
@@ -172,14 +147,16 @@ void Energy::Behavior()
 
 void Energy::consumption_high() 
 {
-    //cerr << "st_high: " << st_high_consumption.Used() << ' ' <<st_high_consumption.Capacity() << '\n'; 
+    cerr << "st_high: " << st_high_consumption.Used() << ' ' <<st_high_consumption.Capacity() << '\n'; 
     Enter(st_high_consumption, 1);
         
     if (st_high_consumption.Full()) {
         // buffer is full of energy and this single process will continue and wait for consumtion time
         Seize(fa_high_timer);
         Leave(st_high_consumption, config.high_consume);
+        Leave(st_high_checker, config.high_consume);
         Wait(Exponential(config.t_consume));
+        //Wait(config.t_consume);
         Release(fa_high_timer);
     }
     else {
@@ -190,15 +167,16 @@ void Energy::consumption_high()
 
 void Energy::consumption_low()
 {
-    //cerr << "st_low: " << st_low_consumption.Used() << ' ' <<st_low_consumption.Capacity() << '\n'; 
+    cerr << "st_low: " << st_low_consumption.Used() << ' ' <<st_low_consumption.Capacity() << '\n'; 
     Enter(st_low_consumption, 1);
         
-
     if (st_low_consumption.Full()) {
         // buffer is full of energy and this single process will continue and wait for consumtion time
         Seize(fa_low_timer);
         Leave(st_low_consumption, config.low_consume);
+        Leave(st_low_checker, config.low_consume);
         Wait(Exponential(config.t_consume));
+        //Wait(config.t_consume);
         Release(fa_low_timer);
     }
     else {
@@ -209,4 +187,67 @@ void Energy::consumption_low()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////                                     ENERGY (END)                                       ////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+////                                     CHECKER (BEGIN)                                    ////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Checker::Behavior()
+{
+    while (true)
+    {
+        if (isHigh == true)
+        {
+            std::cerr << "++CHECKER: st_high_enter\n";
+            Enter(st_high_checker, 1);
+            std::cerr << "++CHECKER: st_high_leave\n";
+            std::cerr << "capacity: " << qu_actual_battery_capacity.Length() << '\n';
+            if (! qu_energy_buffer.Empty())
+            {
+                qu_energy_buffer.GetFirst()->Activate();
+            }
+            else if (! qu_actual_battery_capacity.Empty())
+            {
+                Energy* tmp = dynamic_cast<Energy*> (qu_actual_battery_capacity.GetFirst());
+                tmp->isInit = true;
+                tmp->Activate();
+            }
+            else
+            {
+                std::cerr<< "++CHECKER: pass\n";
+                Passivate();
+            }
+        }
+        else
+        {
+            std::cerr << "++CHECKER: st_low_enter "<< st_low_checker.Used() << ' ' << st_low_checker.Capacity() <<"\n";
+
+            Enter(st_low_checker, 1);
+            std::cerr << "++CHECKER: st_low_leave\n";
+            std::cerr << "capacity: " << qu_actual_battery_capacity.Length() << '\n';
+
+
+            if (! qu_energy_buffer.Empty())
+            {
+                qu_energy_buffer.GetFirst()->Activate();
+            }
+            else if (! qu_actual_battery_capacity.Empty())
+            {
+                Energy* tmp = dynamic_cast<Energy*> (qu_actual_battery_capacity.GetFirst());
+                tmp->isInit = true;
+                tmp->Activate();
+            }
+            else
+            {
+                std::cerr<< "++CHECKER: pass\n";
+                Passivate();
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+////                                     CHECKER (END)                                      ////
 ////////////////////////////////////////////////////////////////////////////////////////////////

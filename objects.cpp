@@ -18,7 +18,11 @@ Facility fa_discharge("Discharge facility");
 
 Queue qu_effectivity("Effectivity queue");
 Queue qu_actual_battery_capacity("Actual battery capacity");
+Queue qu_energy_buffer("Buffer");
 
 Store st_high_consumption("High consumtion store", 0);
 Store st_low_consumption("Low consumtion store", 0);
 Store st_capacity("Batterycapacity", 0);
+
+Store st_high_checker("High checker", 0);
+Store st_low_checker("Low checker", 0);
