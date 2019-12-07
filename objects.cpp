@@ -7,22 +7,43 @@
 
 
 bool isDay = false;
-bool isHigh = false;
+double time_consume = 0;
+int energy_amount = 0;
 
-std::string weather_type;
-
-Facility fa_high_timer("High timer facility");
-Facility fa_low_timer("Low timer facility");
-
-Facility fa_discharge("Discharge facility");
+Facility fa_high_timer("Timer facility");
 
 Queue qu_effectivity("Effectivity queue");
 Queue qu_actual_battery_capacity("Actual battery capacity");
-Queue qu_energy_buffer("Buffer");
+Queue qu_energy_buffer("Energy buffer");
 
-Store st_high_consumption("High consumtion store", 0);
-Store st_low_consumption("Low consumtion store", 0);
-Store st_capacity("Batterycapacity", 0);
+Store st_high_consumption("Consumption store", 0);
+Store st_capacity("Battery capacity", 0);
 
-Store st_high_checker("High checker", 0);
-Store st_low_checker("Low checker", 0);
+Store st_high_checker("Checker", 0);
+
+Statistics stats;
+
+int set_work()
+{
+    // th = 1
+    //  W = (th * Wh) / t
+    return (1 * config.high_consume) / config.t_consume;
+}
+
+double set_time(bool isHigh)
+{   
+    if (isHigh) {
+        // HIGH
+
+        // th = 1
+        return 1;
+    }
+    else {
+        // LOW
+
+        // th = 1
+        // tl = (t * W) / Wl
+        return (config.t_consume * set_work()) / (double)config.low_consume;
+    }
+}
+

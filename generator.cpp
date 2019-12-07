@@ -1,253 +1,193 @@
 #include "generator.h"
 
-#include <iostream>
-
 #include "simlib.h"
 #include "config.h"
 #include "objects.h"
 
+#include <iostream>
+#include <limits>
+
 using namespace std;
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     GENERATOR (BEGIN)                                  ////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief 
- * 
- */
 void Generator::Behavior()
 {
-    // generator of energy
+    bool isFirst = true;
+   // this->checker->Activate();
+
+generator_normal_start:
+
     while (true) {
-        // generate after some time
-        Wait(config.t_generate);
+        cerr << Time << endl;
+        cerr << "[g] start generate\n";
 
-        // if its night stop generation
-        if (isDay == false)
-            break;
-
-        this->checker->Passivate();
-        while (! qu_energy_buffer.Empty())
-        {
+        // if checker passivated itself -> activate checker
+        if (qu_energy_buffer.Empty() && ! st_high_checker.Full()) {
+            cerr << "[g] start checker\n"; 
+            this->checker->Activate();
+        }
+        
+        // add to battery or remove energy 
+        int cnt = 0;
+        while (! qu_energy_buffer.Empty()) {
             qu_energy_buffer.GetFirst()->Activate();
-        }
+            cnt++;
+        } 
 
-        // according to weather generate certain amount
-        if (weather_type == "sunny") {
-            generate(config.energy_sunny);
-        }
-        else if (weather_type == "middle") {
-            generate(config.energy_middle);
-        }
-        else if (weather_type == "cloudy") {
-            generate(config.energy_cloudy);
-        }
-        else {
-            std::cerr << "Error: weather is not set\n";
-        }
+        
+        cerr << "[g] activate from buffer: " << cnt << endl;
 
-        //this->checker->Activate();
-    }
-}
-
-/**
-    * @brief Generation of certain amount of energy
-    * 
-    * @param amount how much energy to generate
-    */
-void Generator::generate(int amount)
-{
-    cerr << "amount: " << amount << endl;
-    for (int i = 0; i < amount; i++) {
-        Energy *tmp = new Energy(false);
-        qu_energy_buffer.Insert(tmp);
-        tmp->Passivate();
-    }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     GENERATOR (END)                                    ////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     ENERGY (BEGIN)                                     ////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-void Energy::Behavior() 
-{
-    // cerr << "++ " << isHigh << " " << st_high_consumption.Full() << endl;
-    //cerr << "++ full: " << st_capacity.Full() << " empty: " << st_capacity.Empty() << endl;
-    //cerr << "++ isInit " << this->isInit << '\n';
-
-    if (this->isInit == false && isHigh == true && ! st_high_consumption.Full()) {
-        cerr << "gen -> high\n";
-        this->consumption_high();
-    }
-    else if (this->isInit == false && isHigh == false && ! st_low_consumption.Full())
-    {
-        cerr << "gen -> low\n";
-        this->consumption_low();
-    }
-    else if (! st_capacity.Full()) {
-        Enter(st_capacity, 1);
-
-        if (this->isInit == false)
-        {
-            if (qu_effectivity.Length() == 10) {
-                for (int i = 0; i < config.battery_efficiency; i++) {
-                    qu_effectivity.GetFirst()->Activate();
-                }
-                qu_effectivity.Clear();
-            }
-            qu_effectivity.Insert(this);
+        if (isDay == false) {
+            cerr << "[g] passivate" << endl;
             Passivate();
+            goto generator_normal_start; // GOTO !!!
         }
-        cerr << "gen -> battery \n";
-        
-        while (true) {
-            if (isHigh == true && ! st_high_consumption.Full())
-            {
-                cerr << "-> high\n";
-                Leave(st_capacity, 1);
-                this->consumption_high();
-                break;
+
+        // initialize battery for the first time
+        if (isFirst) {
+            cerr << "[g] initialize battery\n";
+            for (int i = 0; i < config.battery_init; i++) { // TODO
+                qu_energy_buffer.Insert(new Energy());
             }
-            else if (isHigh == false && ! st_low_consumption.Full()) {
-                cerr << "-> low\n";
-                Leave(st_capacity, 1);
-                this->consumption_low();
-                break;
-            }
-            else if (! fa_discharge.Busy()) {
-                cerr << "-> discharge\n";
-                Seize(fa_discharge);
-                Wait(config.t_discharge);
-                Release(fa_discharge);
-                break;
-            }
-            else {
-                //cerr << "-> battery\n";
-                // TODO
-                qu_actual_battery_capacity.Insert(this);
-                Passivate();
-                //Wait(1);
-            }  
-        }      
-    }
-    else {
-        // unused energy
-        cerr << "gen -> trash\n";
+            isFirst = false;
+        }
+    
+        cerr << "[g] generate to buffer: " << energy_amount << endl ;
+        // generate energy
+        for (int i = 0; i < energy_amount; i++) { // TODO
+            qu_energy_buffer.Insert(new Energy());
+        }
+
+        cerr << "[g] sleep\n";
+        // wait till next generation
+        Wait(config.t_generate);
     }
 }
 
-void Energy::consumption_high() 
-{
-    cerr << "st_high: " << st_high_consumption.Used() << ' ' <<st_high_consumption.Capacity() << '\n'; 
-    Enter(st_high_consumption, 1);
-        
-    if (st_high_consumption.Full()) {
-        // buffer is full of energy and this single process will continue and wait for consumtion time
-        Seize(fa_high_timer);
-        Leave(st_high_consumption, config.high_consume);
-        Leave(st_high_checker, config.high_consume);
-        Wait(Exponential(config.t_consume));
-        //Wait(config.t_consume);
-        Release(fa_high_timer);
-    }
-    else {
-        // there is not enough energy
-        return;
-    }
-}
-
-void Energy::consumption_low()
-{
-    cerr << "st_low: " << st_low_consumption.Used() << ' ' <<st_low_consumption.Capacity() << '\n'; 
-    Enter(st_low_consumption, 1);
-        
-    if (st_low_consumption.Full()) {
-        // buffer is full of energy and this single process will continue and wait for consumtion time
-        Seize(fa_low_timer);
-        Leave(st_low_consumption, config.low_consume);
-        Leave(st_low_checker, config.low_consume);
-        Wait(Exponential(config.t_consume));
-        //Wait(config.t_consume);
-        Release(fa_low_timer);
-    }
-    else {
-        // there is not enough energy
-        return;
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     ENERGY (END)                                       ////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     CHECKER (BEGIN)                                    ////
-////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Checker::Behavior()
 {
-    while (true)
-    {
-        if (isHigh == true)
-        {
-            std::cerr << "++CHECKER: st_high_enter\n";
-            Enter(st_high_checker, 1);
-            std::cerr << "++CHECKER: st_high_leave\n";
-            std::cerr << "capacity: " << qu_actual_battery_capacity.Length() << '\n';
-            if (! qu_energy_buffer.Empty())
-            {
-                qu_energy_buffer.GetFirst()->Activate();
-            }
-            else if (! qu_actual_battery_capacity.Empty())
-            {
-                Energy* tmp = dynamic_cast<Energy*> (qu_actual_battery_capacity.GetFirst());
-                tmp->isInit = true;
-                tmp->Activate();
-            }
-            else
-            {
-                std::cerr<< "++CHECKER: pass\n";
-                Passivate();
-            }
+    while (true) {
+        // cerr << "[c] st_high " << st_high_checker.Capacity() << ' ' << st_high_checker.Used() << endl;
+        cerr << " [c] before ENTER " << st_high_checker.Capacity() << ' ' << st_high_checker.Used() << endl;
+        Enter(st_high_checker, 1);
+        cerr << " [c] after  ENTER " << st_high_checker.Capacity() << ' ' << st_high_checker.Used() << endl;
+
+        if (! qu_energy_buffer.Empty()) {
+            qu_energy_buffer.GetFirst()->Activate();
+            cerr << " [c] release energy buffer\n";
         }
-        else
-        {
-            std::cerr << "++CHECKER: st_low_enter "<< st_low_checker.Used() << ' ' << st_low_checker.Capacity() <<"\n";
-
-            Enter(st_low_checker, 1);
-            std::cerr << "++CHECKER: st_low_leave\n";
-            std::cerr << "capacity: " << qu_actual_battery_capacity.Length() << '\n';
-
-
-            if (! qu_energy_buffer.Empty())
-            {
-                qu_energy_buffer.GetFirst()->Activate();
-            }
-            else if (! qu_actual_battery_capacity.Empty())
-            {
-                Energy* tmp = dynamic_cast<Energy*> (qu_actual_battery_capacity.GetFirst());
-                tmp->isInit = true;
-                tmp->Activate();
-            }
-            else
-            {
-                std::cerr<< "++CHECKER: pass\n";
-                Passivate();
-            }
+        else if (! qu_actual_battery_capacity.Empty()) {
+            cerr << " [c] release energy battery " << qu_actual_battery_capacity.Length() << "\n" ;
+            qu_actual_battery_capacity.GetFirst()->Activate();
+        }
+        else {
+            Leave(st_high_checker, 1);
+            cerr << " [c] passivate " << st_high_checker.Capacity() << ' ' << st_high_checker.Used() << endl;
+            Passivate();
         }
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-////                                     CHECKER (END)                                      ////
-////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Energy::Behavior()
+{   
+    // ONLY NOW GENERATED
+    if (! st_high_consumption.Full()) {
+        // HIGH CONSUMPTION OBJECT
+        cerr << "  [e] gen -> high\n";
+        consumption_high();
+    }
+    else if (! st_capacity.Full()) {
+        // BATTERY
+        Enter(st_capacity, 1);
+        cerr << "  [e] gen -> effectivity\n";
+
+        if (qu_effectivity.Length() == 10) {
+            for (int i = 0; i < config.battery_efficiency; i++) {
+                qu_effectivity.GetFirst()->Activate();
+            }
+            for (int i = 0; i < 10 - config.battery_efficiency; i++) {
+                Leave(st_capacity, 1);
+            }
+            qu_effectivity.Clear();
+        }
+        qu_effectivity.Insert(this);
+        Passivate();
+
+        cerr << "  [e] effectivity -> battery\n";
+        // store to battery
+        qu_actual_battery_capacity.Insert(this);
+        Passivate();
+        
+        // IN BATTERY
+        cerr << "  [e] battery released\n";
+        if (! st_high_consumption.Full()) {
+            //cerr << "-> high\n";
+            cerr << "  [e] battery -> high\n";
+            Leave(st_capacity, 1);
+            this->consumption_high();
+        }
+        else {
+            // TODO - dead code ?? maybe ??
+            cerr << "WHAT?\n";
+        }
+    }
+    else {
+        cerr << "  [e] -\n";
+        stats.excess_energy++;
+    }
+}
+
+
+void Energy::consumption_high()
+{
+    cerr << "  [e] +\n";
+    Enter(st_high_consumption, 1);
+    
+    if (st_high_consumption.Full()) {
+        cerr << "  [e] before SEIZE\n";
+
+        double time_start = Time;
+        Seize(fa_high_timer);
+        double time_end = Time;
+
+        if (time_end - time_start < std::numeric_limits<double>::epsilon())
+        {
+            stats.no_energy++;
+        }
+
+        cerr << "  [e] after SEIZE\n";
+        
+        cerr << "  [e] st_checker " << st_high_checker.Capacity() << ' ' << st_high_checker.Used() << endl;
+        Leave(st_high_checker, config.high_consume);
+        cerr << "  [e] st_checker " << st_high_checker.Capacity() << ' ' << st_high_checker.Used() << endl;
+        
+        cerr << "  [e] st_high    " << st_high_consumption.Capacity() << ' ' << st_high_consumption.Used() << endl;
+        Leave(st_high_consumption, config.high_consume);
+        cerr << "  [e] st_high    " << st_high_consumption.Capacity() << ' ' << st_high_consumption.Used() << endl;
+        
+        cerr << "  start " << Time << endl;
+        Wait(Exponential(time_consume));
+        cerr << "  end " << Time << endl;
+        Release(fa_high_timer);
+    }
+    else {
+        // remove excess energy and leave only single energy for timer
+        return;
+    }
+}
+
+void SelfDischarge::Behavior()
+{
+    while (true)
+    {
+        Wait(config.t_discharge);
+        if (! qu_actual_battery_capacity.Empty())
+        {
+            qu_actual_battery_capacity.GetFirst();
+            cerr <<  "   [d] - \n";
+
+            Leave(st_capacity, 1);
+        }
+    }
+}

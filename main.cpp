@@ -33,10 +33,10 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    cout << config.t_day_high << endl;
-    cout << config.t_generate << endl;
-    cout << config.p_sunny << endl;
-    cout << config.energy_sunny << endl;
+    // cout << config.t_day_high << endl;
+    // cout << config.t_generate << endl;
+    // cout << config.p_sunny << endl;
+    // cout << config.energy_sunny << endl;
 
 
     Simulation sim;

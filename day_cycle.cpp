@@ -9,6 +9,7 @@
 
 using namespace std;
 
+
 void print(string fmt)
 {
     cerr << "--------------------------------" << endl;
@@ -16,64 +17,64 @@ void print(string fmt)
     cerr << "--------------------------------" << endl;
 }
 
+
 void DayCycle::Behavior()
 {
-    for (int i = 0; i < config.battery_init; i++)
-    {
-        qu_actual_battery_capacity.Insert(new Energy(true));
-    }
-    
-    Checker* checker = new Checker;
-    checker->Activate();
 
     while (true) {
         // ============ DAY LOW - BEGIN ===============
         print("DAY LOW");
         isDay = true;
-        isHigh = false;  
+        time_consume = set_time(false); 
         
-        // create new weather setter and new generator for a day
+        // set new weather for a day
         int uni = Uniform(0, 100);
-        //std::cout << uni << std::endl;
         if (uni <= config.p_sunny) {
-            weather_type = "sunny";
             cerr << "Weather: sunny\n"; 
+            energy_amount = config.energy_sunny;
+
+            stats.weather(0);
         }
         else if (config.p_sunny < uni && uni <= config.p_sunny + config.p_middle) {
-            weather_type = "middle";
             cerr << "Weather: middle\n";
+            energy_amount = config.energy_middle;
+
+            stats.weather(1);
         }
         else {
-            weather_type = "cloudy";
             cerr << "Weather: cloudy\n";
+            energy_amount = config.energy_cloudy;
+
+            stats.weather(2);
         }
         
-        (new Generator(checker))->Activate();
-        // ============ DAY LOW - END =================
+        this->generator->Activate();
+
 
         Wait(config.t_day_low);
-
         // ============ DAY HIGH - BEGIN ===============
         print("DAY HIGH");
-        isDay = true;
-        isHigh = true;  
-        // ============ DAY HIGH - END ===============
+        isDay = true; 
+        time_consume = set_time(true); 
+
+
 
         Wait(config.t_day_high);
-
         // ============ NIGHT HIGH - BEGIN ===============
         print("NIGHT HIGH");
-        isDay = false;
-        isHigh = true;  
-        // ============ NIGHT HIGH - END ===============
+        isDay = false; 
+        time_consume = set_time(true); 
+
+        // generator will passivate itself
+
+
 
         Wait(config.t_night_high);
-
         // ============ NIGHT LOW - BEGIN ===============
         print("NIGHT LOW");
         isDay = false;
-        isHigh = false;  
-        // ============ NIGHT LOW - END ===============
+        time_consume = set_time(false); 
+
 
         Wait(config.t_night_low);
     }
