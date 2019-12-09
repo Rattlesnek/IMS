@@ -12,7 +12,6 @@ using namespace std;
 void Generator::Behavior()
 {
     bool isFirst = true;
-   // this->checker->Activate();
 
 generator_normal_start:
 
@@ -26,7 +25,7 @@ generator_normal_start:
             this->checker->Activate();
         }
         
-        // add to battery or remove energy 
+        // add to reservoir or remove energy 
         int cnt = 0;
         while (! qu_energy_buffer.Empty()) {
             qu_energy_buffer.GetFirst()->Activate();
@@ -42,10 +41,10 @@ generator_normal_start:
             goto generator_normal_start; // GOTO !!!
         }
 
-        // initialize battery for the first time
+        // initialize energy reservoir for the first time
         if (isFirst) {
-            cerr << "[g] initialize battery\n";
-            for (int i = 0; i < config.battery_init; i++) { // TODO
+            cerr << "[g] initialize reservoir\n";
+            for (int i = 0; i < config.reservoir_init; i++) {
                 qu_energy_buffer.Insert(new Energy());
             }
             isFirst = false;
@@ -53,9 +52,11 @@ generator_normal_start:
     
         cerr << "[g] generate to buffer: " << energy_amount << endl ;
         // generate energy
-        for (int i = 0; i < energy_amount; i++) { // TODO
+        for (int i = 0; i < energy_amount; i++) {
             qu_energy_buffer.Insert(new Energy());
         }
+        // statistics
+        stats.current_day_generation += energy_amount;
 
         cerr << "[g] sleep\n";
         // wait till next generation
@@ -76,9 +77,9 @@ void Checker::Behavior()
             qu_energy_buffer.GetFirst()->Activate();
             cerr << " [c] release energy buffer\n";
         }
-        else if (! qu_actual_battery_capacity.Empty()) {
-            cerr << " [c] release energy battery " << qu_actual_battery_capacity.Length() << "\n" ;
-            qu_actual_battery_capacity.GetFirst()->Activate();
+        else if (! qu_actual_reservoir_capacity.Empty()) {
+            cerr << " [c] release energy reservoir " << qu_actual_reservoir_capacity.Length() << "\n" ;
+            qu_actual_reservoir_capacity.GetFirst()->Activate();
         }
         else {
             Leave(st_high_checker, 1);
@@ -95,18 +96,20 @@ void Energy::Behavior()
     if (! st_high_consumption.Full()) {
         // HIGH CONSUMPTION OBJECT
         cerr << "  [e] gen -> high\n";
+        // statistics
+        stats.current_day_consumption += 1;
         consumption_high();
     }
     else if (! st_capacity.Full()) {
-        // BATTERY
-        Enter(st_capacity, 1);
+        // RESERVOIR
         cerr << "  [e] gen -> effectivity\n";
+        Enter(st_capacity, 1);
 
-        if (qu_effectivity.Length() == 10) {
-            for (int i = 0; i < config.battery_efficiency; i++) {
+        if (qu_effectivity.Length() == 100) {
+            for (int i = 0; i < set_efficiency(); i++) {
                 qu_effectivity.GetFirst()->Activate();
             }
-            for (int i = 0; i < 10 - config.battery_efficiency; i++) {
+            for (int i = 0; i < 100 - set_efficiency(); i++) {
                 Leave(st_capacity, 1);
             }
             qu_effectivity.Clear();
@@ -114,16 +117,18 @@ void Energy::Behavior()
         qu_effectivity.Insert(this);
         Passivate();
 
-        cerr << "  [e] effectivity -> battery\n";
-        // store to battery
-        qu_actual_battery_capacity.Insert(this);
+        cerr << "  [e] effectivity -> reservoir\n";
+        // store to reservoir
+        qu_actual_reservoir_capacity.Insert(this);
         Passivate();
         
-        // IN BATTERY
-        cerr << "  [e] battery released\n";
+        // IN RESERVOIR
+        cerr << "  [e] reservoir released\n";
         if (! st_high_consumption.Full()) {
-            //cerr << "-> high\n";
-            cerr << "  [e] battery -> high\n";
+            // HIGH CONSUMPTION OBJECT
+            cerr << "  [e] reservoir -> high\n";
+            // statistics
+            stats.current_day_consumption += 1;
             Leave(st_capacity, 1);
             this->consumption_high();
         }
@@ -182,9 +187,9 @@ void SelfDischarge::Behavior()
     while (true)
     {
         Wait(config.t_discharge);
-        if (! qu_actual_battery_capacity.Empty())
+        if (! qu_actual_reservoir_capacity.Empty())
         {
-            qu_actual_battery_capacity.GetFirst();
+            qu_actual_reservoir_capacity.GetFirst();
             cerr <<  "   [d] - \n";
 
             Leave(st_capacity, 1);

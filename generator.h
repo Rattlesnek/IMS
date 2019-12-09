@@ -26,8 +26,6 @@ public:
     void Behavior();
 
     void consumption_high();
-
-    void battery_switch();
 };
 
 class SelfDischarge : public Process
