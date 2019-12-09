@@ -1,0 +1,328 @@
+WORK:        60
+TIME low:    3.15789
+TIME middle: 1.39535
+TIME high:   1
++----------------------------------------------------------+
+| QUEUE Actual reservoir capacity                          |
++----------------------------------------------------------+
+|  Time interval = 0 - 43200                               |
+|  Incoming  486324                                        |
+|  Outcoming  486324                                       |
+|  Current length = 0                                      |
+|  Maximal length = 14658                                  |
+|  Average length = 3318.57                                |
+|  Minimal time = 0.00997776                               |
+|  Maximal time = 653.531                                  |
+|  Average time = 294.787                                  |
+|  Standard deviation = 150.52                             |
++----------------------------------------------------------+
++----------------------------------------------------------+
+| STORE Consumption store                                  |
++----------------------------------------------------------+
+|  Capacity = 60  (30 used, 30 free)                       |
+|  Time interval = 0 - 43200                               |
+|  Number of Enter operations = 1140030                    |
+|  Minimal used capacity = 0                               |
+|  Maximal used capacity = 60                              |
+|  Average used capacity = 45.1921                         |
++----------------------------------------------------------+
+
++----------------------------------------------------------+
+| STORE Reservoir capacity                                 |
++----------------------------------------------------------+
+|  Capacity = 3057600  (60 used, 3057540 free)             |
+|  Time interval = 0 - 43200                               |
+|  Number of Enter operations = 600460                     |
+|  Minimal used capacity = 1                               |
+|  Maximal used capacity = 14700                           |
+|  Average used capacity = 3368.76                         |
++----------------------------------------------------------+
+
++----------------------------------------------------------+
+| HISTOGRAM Weather                                        |
++----------------------------------------------------------+
+| STATISTIC                                                |
++----------------------------------------------------------+
+|  Min = 0                       Max = 2                   |
+|  Number of records = 31                                  |
+|  Average value = 0.83871                                 |
++----------------------------------------------------------+
+|    from    |     to     |     n    |   rel    |   sum    |
++------------+------------+----------+----------+----------+
+|      0.000 |      1.000 |       14 | 0.451613 | 0.451613 |
+|      1.000 |      2.000 |        8 | 0.258065 | 0.709677 |
+|      2.000 |      3.000 |        9 | 0.290323 | 1.000000 |
++------------+------------+----------+----------+----------+
+
+Excess energy: 0
+No energy: 1497
+=======================================
+ DAY: 0
+ weather type: 1
+ generation:   42900
+ consumption:  47103
+ night start reservoir: 12783
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 1
+ weather type: 0
+ generation:   51480
+ consumption:  46194
+ night start reservoir: 12297
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 2
+ weather type: 1
+ generation:   42900
+ consumption:  38910
+ night start reservoir: 4287
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 3
+ weather type: 0
+ generation:   51480
+ consumption:  46062
+ night start reservoir: 14169
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 4
+ weather type: 2
+ generation:   25740
+ consumption:  23988
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             122
+=======================================
+=======================================
+ DAY: 5
+ weather type: 2
+ generation:   25740
+ consumption:  24684
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             202
+=======================================
+=======================================
+ DAY: 6
+ weather type: 1
+ generation:   42900
+ consumption:  39005
+ night start reservoir: 3866
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 7
+ weather type: 2
+ generation:   25740
+ consumption:  24685
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             175
+=======================================
+=======================================
+ DAY: 8
+ weather type: 1
+ generation:   42900
+ consumption:  38853
+ night start reservoir: 5103
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 9
+ weather type: 0
+ generation:   51480
+ consumption:  46278
+ night start reservoir: 12342
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 10
+ weather type: 1
+ generation:   42900
+ consumption:  38872
+ night start reservoir: 7174
+ night end reservoir:   0
+ no energy:             3
+=======================================
+=======================================
+ DAY: 11
+ weather type: 0
+ generation:   51480
+ consumption:  46187
+ night start reservoir: 14100
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 12
+ weather type: 1
+ generation:   42900
+ consumption:  38885
+ night start reservoir: 6725
+ night end reservoir:   0
+ no energy:             3
+=======================================
+=======================================
+ DAY: 13
+ weather type: 1
+ generation:   42900
+ consumption:  38857
+ night start reservoir: 4443
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 14
+ weather type: 2
+ generation:   25740
+ consumption:  24537
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             186
+=======================================
+=======================================
+ DAY: 15
+ weather type: 0
+ generation:   51480
+ consumption:  46497
+ night start reservoir: 13737
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 16
+ weather type: 0
+ generation:   51480
+ consumption:  46164
+ night start reservoir: 14541
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 17
+ weather type: 0
+ generation:   51480
+ consumption:  46137
+ night start reservoir: 14658
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 18
+ weather type: 0
+ generation:   51480
+ consumption:  46233
+ night start reservoir: 12111
+ night end reservoir:   0
+ no energy:             2
+=======================================
+=======================================
+ DAY: 19
+ weather type: 1
+ generation:   42900
+ consumption:  38949
+ night start reservoir: 4920
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 20
+ weather type: 0
+ generation:   51480
+ consumption:  46488
+ night start reservoir: 11988
+ night end reservoir:   0
+ no energy:             2
+=======================================
+=======================================
+ DAY: 21
+ weather type: 0
+ generation:   51480
+ consumption:  46275
+ night start reservoir: 12903
+ night end reservoir:   0
+ no energy:             2
+=======================================
+=======================================
+ DAY: 22
+ weather type: 2
+ generation:   25740
+ consumption:  24255
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             143
+=======================================
+=======================================
+ DAY: 23
+ weather type: 2
+ generation:   25740
+ consumption:  24261
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             150
+=======================================
+=======================================
+ DAY: 24
+ weather type: 2
+ generation:   25740
+ consumption:  24633
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             193
+=======================================
+=======================================
+ DAY: 25
+ weather type: 2
+ generation:   25740
+ consumption:  23967
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             125
+=======================================
+=======================================
+ DAY: 26
+ weather type: 0
+ generation:   51480
+ consumption:  46266
+ night start reservoir: 13905
+ night end reservoir:   0
+ no energy:             2
+=======================================
+=======================================
+ DAY: 27
+ weather type: 0
+ generation:   51480
+ consumption:  45927
+ night start reservoir: 14352
+ night end reservoir:   0
+ no energy:             1
+=======================================
+=======================================
+ DAY: 28
+ weather type: 2
+ generation:   25740
+ consumption:  24477
+ night start reservoir: 0
+ night end reservoir:   0
+ no energy:             172
+=======================================
+=======================================
+ DAY: 29
+ weather type: 0
+ generation:   51480
+ consumption:  46335
+ night start reservoir: 13023
+ night end reservoir:   0
+ no energy:             1
+=======================================

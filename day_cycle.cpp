@@ -26,7 +26,7 @@ void DayCycle::Behavior()
         DayStats day;
         stats.current_day_generation = 0;
         stats.current_day_consumption = 0;
-        
+        stats.current_day_no_energy = 0;
         
         /////////////////////////////////////////////////////
         ///             DAY MIDDLE - LOW                  ///
@@ -120,6 +120,7 @@ void DayCycle::Behavior()
         day.night_end_reservoir = qu_actual_reservoir_capacity.Length();
         day.day_generation = stats.current_day_generation;
         day.day_consumption = stats.current_day_consumption;
+        day.no_energy = stats.current_day_no_energy;
         stats.day_stats.push_back(day);
     }
 }

@@ -38,6 +38,8 @@ public:
     int day_generation;
     int day_consumption;
 
+    int no_energy;
+
     DayStats()
     {   
         day_weather = 0;
@@ -47,6 +49,8 @@ public:
 
         day_generation = 0;
         day_consumption = 0;
+
+        no_energy = 0;
     }
 };
 
@@ -59,6 +63,7 @@ public:
 
     int excess_energy;
     int no_energy;
+    int current_day_no_energy;
 
     int current_day_generation;
     int current_day_consumption;
@@ -70,6 +75,7 @@ public:
     {
         excess_energy = 0;
         no_energy = -1; //objects always wait on the first energy
+        current_day_no_energy = 0;
         current_day_generation = 0;
         current_day_consumption = 0;
     }

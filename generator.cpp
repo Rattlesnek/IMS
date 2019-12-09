@@ -159,6 +159,7 @@ void Energy::consumption_high()
         if (time_end - time_start < std::numeric_limits<double>::epsilon())
         {
             stats.no_energy++;
+            stats.current_day_no_energy++;
         }
 
         cerr << "  [e] after SEIZE\n";

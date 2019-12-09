@@ -1,6 +1,8 @@
 #include "simulation.h"
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #include "simlib.h"
 
 #include "day_cycle.h"
@@ -9,7 +11,7 @@
 
 using namespace std;
 
-void Simulation::run(unsigned long runtime)
+void Simulation::run(unsigned long runtime, std::string day_csv, std::string reservoir_csv)
 {
     cout << "WORK:        " << set_work() << '\n';
     cout << "TIME low:    " << set_time("low") << '\n'; 
@@ -43,6 +45,12 @@ void Simulation::run(unsigned long runtime)
     cout << "Excess energy: " << stats.excess_energy << '\n';
     cout << "No energy: " << stats.no_energy << '\n';
 
+    fstream fday;
+    fday.open(day_csv, fstream::out);
+    
+    fstream freservoir;
+    freservoir.open(reservoir_csv, fstream::out);
+
     for (unsigned long i = 0; i < stats.day_stats.size(); i++) {
         auto &day_stat  = stats.day_stats[i];
         cout << "=======================================\n";
@@ -52,7 +60,15 @@ void Simulation::run(unsigned long runtime)
         cout << " consumption:  " << day_stat.day_consumption << endl;
         cout << " night start reservoir: " << day_stat.night_start_reservoir << endl;
         cout << " night end reservoir:   " << day_stat.night_end_reservoir << endl;
+        cout << " no energy:             " << day_stat.no_energy << endl;
         cout << "=======================================\n";
+
+        fday << i << ',' << day_stat.day_weather << ',' << day_stat.day_generation << ',' << day_stat.day_consumption << ',' << day_stat.no_energy << endl;
+        
+        freservoir << i << ',' << day_stat.night_start_reservoir << endl;
+        freservoir << i + 0.5 << ',' << day_stat.night_end_reservoir << endl;
     }
 
+    fday.close();
+    freservoir.close();
 }

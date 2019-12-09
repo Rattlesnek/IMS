@@ -15,10 +15,10 @@ using namespace config4cpp;
 int main(int argc, char ** argv)
 {
     unsigned long time_of_simulation = 0;
-    if (argc != 3)
+    if (argc != 5)
     {
         std::cerr << "Invalid number of arguments!\n"; 
-        std::cerr << "  Try ./main <config_file> <time_of_simulation>\n";
+        std::cerr << "  Try ./main <config_file> <time_of_simulation> <day_info.csv> <reservoir.csv>\n";
         return 1;
     }
     	
@@ -40,7 +40,7 @@ int main(int argc, char ** argv)
 
 
     Simulation sim;
-    sim.run(time_of_simulation);
+    sim.run(time_of_simulation, argv[3], argv[4]);
 
     return 0;
 }
